@@ -41,7 +41,6 @@ add_library(mumlib ${MUMLIB_SRC} ${MUMLIB_PUBLIC_HEADERS} ${MUMLIB_PRIVATE_HEADE
 
 target_compile_features(mumlib PUBLIC cxx_std_11)
 
-target_include_directories(mumlib PUBLIC ${Boost_INCLUDE_DIR})
 target_include_directories(mumlib PUBLIC ${OPENSSL_INCLUDE_DIR})
 target_include_directories(mumlib PUBLIC ${PROTOBUF_INCLUDE_DIRS})
 
@@ -51,7 +50,7 @@ target_include_directories(mumlib PRIVATE "include")
 target_link_libraries(mumlib
 	${SPEEX_LIBRARIES}
 	${PROTOBUF_LIBRARIES}
-	${Boost_LIBRARIES}
+	Boost::system
 	${OPENSSL_LIBRARIES}
 	opus
 )
