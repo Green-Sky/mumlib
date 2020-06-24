@@ -45,7 +45,7 @@ target_include_directories(mumlib PUBLIC ${OPENSSL_INCLUDE_DIR})
 target_include_directories(mumlib PUBLIC ${PROTOBUF_INCLUDE_DIRS})
 
 target_include_directories(mumlib PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
-target_include_directories(mumlib PRIVATE "include")
+target_include_directories(mumlib PUBLIC "include")
 
 target_link_libraries(mumlib
 	${SPEEX_LIBRARIES}
