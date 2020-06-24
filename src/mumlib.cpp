@@ -73,7 +73,7 @@ namespace mumlib {
         }
 
         bool processAudioPacket(AudioPacketType type, uint8_t *buffer, int length) {
-            printf("INFO: Got %d B of encoded audio data.", length);
+            printf("INFO: Got %d B of encoded audio data.\n", length);
             try {
                 auto incomingAudioPacket = audio.decodeIncomingAudioPacket(buffer, length);
 
@@ -101,7 +101,7 @@ namespace mumlib {
                                 status.first);
 
                 } else {
-                    printf("WARN: Incoming audio packet doesn't contain Opus data, calling unsupportedAudio callback. Type: %d", type);
+                    printf("WARN: Incoming audio packet doesn't contain Opus data, calling unsupportedAudio callback. Type: %d\n", type);
                     callback.unsupportedAudio(incomingAudioPacket.target,
                                               incomingAudioPacket.sessionId,
                                               incomingAudioPacket.sequenceNumber,
@@ -110,7 +110,7 @@ namespace mumlib {
                 }
 
             } catch (mumlib::AudioException &exp) {
-                printf("ERROR: Audio decode error: %s.", exp.what());
+                printf("ERROR: Audio decode error: %s.\n", exp.what());
             }
 
             return true;
@@ -119,7 +119,7 @@ namespace mumlib {
     private:
 
         bool processIncomingTcpMessage(MessageType messageType, uint8_t *buffer, int length) {
-            printf("DEBUG: Process incoming message: type %d, length: %d.", messageType, length);
+            printf("DEBUG: Process incoming message: type %d, length: %d.\n", messageType, length);
 
             switch (messageType) {
                 case MessageType::VERSION: {
@@ -319,25 +319,25 @@ namespace mumlib {
                 }
                     break;
                 case MessageType::PERMISSIONDENIED: // 12
-                    printf("WARN: PermissionDenied Message: support not implemented yet");
+                    printf("WARN: PermissionDenied Message: support not implemented yet\n");
                     break;
                 case MessageType::ACL: // 13
-                    printf("WARN: ACL Message: support not implemented yet.");
+                    printf("WARN: ACL Message: support not implemented yet.\n");
                     break;
                 case MessageType::QUERYUSERS: // 14
-                    printf("WARN: QueryUsers Message: support not implemented yet");
+                    printf("WARN: QueryUsers Message: support not implemented yet\n");
                     break;
                 case MessageType::CONTEXTACTIONMODIFY: // 16
-                    printf("WARN: ContextActionModify Message: support not implemented yet");
+                    printf("WARN: ContextActionModify Message: support not implemented yet\n");
                     break;
                 case MessageType::CONTEXTACTION: // 17
-                    printf("WARN: ContextAction Message: support not implemented yet");
+                    printf("WARN: ContextAction Message: support not implemented yet\n");
                     break;
                 case MessageType::USERLIST: // 18
-                    printf("WARN: UserList Message: support not implemented yet");
+                    printf("WARN: UserList Message: support not implemented yet\n");
                     break;
                 case MessageType::VOICETARGET:
-                    printf("WARN: VoiceTarget Message: I don't think the server ever sends this structure.");
+                    printf("WARN: VoiceTarget Message: I don't think the server ever sends this structure\n.");
                     break;
                 case MessageType::PERMISSIONQUERY: {
                     MumbleProto::PermissionQuery permissionQuery;
@@ -363,10 +363,10 @@ namespace mumlib {
                 }
                     break;
                 case MessageType::USERSTATS:
-                    printf("WARN: UserStats Message: support not implemented yet");
+                    printf("WARN: UserStats Message: support not implemented yet\n");
                     break;
                 case MessageType::REQUESTBLOB: // 23
-                    printf("WARN: RequestBlob Message: I don't think this is sent by the server.");
+                    printf("WARN: RequestBlob Message: I don't think this is sent by the server\n.");
                     break;
                 case MessageType::SERVERCONFIG: {
                     MumbleProto::ServerConfig serverConfig;
@@ -383,7 +383,7 @@ namespace mumlib {
                 }
                     break;
                 case MessageType::SUGGESTCONFIG: // 25
-                    printf("WARN: SuggestConfig Message: support not implemented yet");
+                    printf("WARN: SuggestConfig Message: support not implemented yet\n");
                     break;
                 default:
                     throw MumlibException("unknown message type: " + to_string(static_cast<int>(messageType)));

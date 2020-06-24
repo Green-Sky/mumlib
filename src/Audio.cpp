@@ -131,7 +131,7 @@ void mumlib::Audio::addFrameToBuffer(uint8_t *inputBuffer, int inputLength, int 
         resetJitterBuffer();
     }
 
-    printf("INFO: Opus packet, frame: %d, samples: %d, channel: %d", frame, samples, channel);
+    printf("INFO: Opus packet, frame: %d, samples: %d, channel: %d\n", frame, samples, channel);
 
     JitterBufferPacket jbPacket;
     jbPacket.data = reinterpret_cast<char *>(&inputBuffer[dataPointer]);
@@ -195,7 +195,7 @@ std::pair<int, bool> mumlib::Audio::decodeOpusPayload(int sessionId, int16_t *pc
         jitter_buffer_tick(jbBuffer);
     }
     
-    printf("DEBUG: %d B of Opus data decoded to %d PCM samples, last packet: %d.",
+    printf("DEBUG: %d B of Opus data decoded to %d PCM samples, last packet: %d.\n",
                  opusDataLength, outputSize, lastPacket);
 
     return std::make_pair(outputSize, lastPacket);
@@ -260,7 +260,7 @@ std::pair<int, bool>  mumlib::Audio::decodeOpusPayload(uint8_t *inputBuffer,
                               opus_strerror(outputSize)).str());
     }
 
-    printf("DEBUG: %d B of Opus data decoded to %d PCM samples, last packet: %d.",
+    printf("DEBUG: %d B of Opus data decoded to %d PCM samples, last packet: %d.\n",
                  opusDataLength, outputSize, lastPacket);
 
     return std::make_pair(outputSize, lastPacket);
@@ -275,7 +275,7 @@ int mumlib::Audio::encodeAudioPacket(int target, int16_t *inputPcmBuffer, int in
             system_clock::now() - lastEncodedAudioPacketTimestamp).count();
 
     if (lastAudioPacketSentInterval > RESET_SEQUENCE_NUMBER_INTERVAL.total_milliseconds() + 1000) {
-        printf("NOTICE: Last audio packet was sent %d ms ago, resetting encoder.", lastAudioPacketSentInterval);
+        printf("NOTICE: Last audio packet was sent %d ms ago, resetting encoder.\n", lastAudioPacketSentInterval);
         resetEncoder();
     }
 
@@ -325,7 +325,7 @@ void mumlib::Audio::resetEncoder() {
 }
 
 void mumlib::Audio::resetJitterBuffer() {
-    printf("DEBUG: Last audio packet, resetting jitter buffer");
+    printf("DEBUG: Last audio packet, resetting jitter buffer\n");
     jitter_buffer_reset(jbBuffer);
 }
 
