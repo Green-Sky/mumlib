@@ -9,7 +9,7 @@
 #include <boost/asio.hpp>
 #include <boost/bind.hpp>
 #include <openssl/sha.h>
-#include <log4cpp/Category.hh>
+//#include <log4cpp/Category.hh>
 
 #if defined(__MSYS__) && defined(__URUSSTUDIO__)
 #include "Mumble.pb-msys.h"
@@ -24,7 +24,7 @@ using namespace mumlib;
 
 namespace mumlib {
     struct _Mumlib_Private : boost::noncopyable {
-        log4cpp::Category &logger = log4cpp::Category::getInstance("mumlib.Mumlib");
+        //log4cpp::Category &logger = log4cpp::Category::getInstance("mumlib.Mumlib");
 
         bool externalIoService;
         io_service &ioService;
@@ -73,7 +73,7 @@ namespace mumlib {
         }
 
         bool processAudioPacket(AudioPacketType type, uint8_t *buffer, int length) {
-            logger.info("Got %d B of encoded audio data.", length);
+            printf("INFO: Got %d B of encoded audio data.", length);
             try {
                 auto incomingAudioPacket = audio.decodeIncomingAudioPacket(buffer, length);
 
@@ -101,7 +101,7 @@ namespace mumlib {
                                 status.first);
 
                 } else {
-                    logger.warn("Incoming audio packet doesn't contain Opus data, calling unsupportedAudio callback. Type: %d", type);
+                    printf("WARN: Incoming audio packet doesn't contain Opus data, calling unsupportedAudio callback. Type: %d", type);
                     callback.unsupportedAudio(incomingAudioPacket.target,
                                               incomingAudioPacket.sessionId,
                                               incomingAudioPacket.sequenceNumber,
@@ -110,7 +110,7 @@ namespace mumlib {
                 }
 
             } catch (mumlib::AudioException &exp) {
-                logger.error("Audio decode error: %s.", exp.what());
+                printf("ERROR: Audio decode error: %s.", exp.what());
             }
 
             return true;
@@ -119,7 +119,7 @@ namespace mumlib {
     private:
 
         bool processIncomingTcpMessage(MessageType messageType, uint8_t *buffer, int length) {
-            logger.debug("Process incoming message: type %d, length: %d.", messageType, length);
+            printf("DEBUG: Process incoming message: type %d, length: %d.", messageType, length);
 
             switch (messageType) {
                 case MessageType::VERSION: {
@@ -319,25 +319,25 @@ namespace mumlib {
                 }
                     break;
                 case MessageType::PERMISSIONDENIED: // 12
-                    logger.warn("PermissionDenied Message: support not implemented yet");
+                    printf("WARN: PermissionDenied Message: support not implemented yet");
                     break;
                 case MessageType::ACL: // 13
-                    logger.warn("ACL Message: support not implemented yet.");
+                    printf("WARN: ACL Message: support not implemented yet.");
                     break;
                 case MessageType::QUERYUSERS: // 14
-                    logger.warn("QueryUsers Message: support not implemented yet");
+                    printf("WARN: QueryUsers Message: support not implemented yet");
                     break;
                 case MessageType::CONTEXTACTIONMODIFY: // 16
-                    logger.warn("ContextActionModify Message: support not implemented yet");
+                    printf("WARN: ContextActionModify Message: support not implemented yet");
                     break;
                 case MessageType::CONTEXTACTION: // 17
-                    logger.warn("ContextAction Message: support not implemented yet");
+                    printf("WARN: ContextAction Message: support not implemented yet");
                     break;
                 case MessageType::USERLIST: // 18
-                    logger.warn("UserList Message: support not implemented yet");
+                    printf("WARN: UserList Message: support not implemented yet");
                     break;
                 case MessageType::VOICETARGET:
-                    logger.warn("VoiceTarget Message: I don't think the server ever sends this structure.");
+                    printf("WARN: VoiceTarget Message: I don't think the server ever sends this structure.");
                     break;
                 case MessageType::PERMISSIONQUERY: {
                     MumbleProto::PermissionQuery permissionQuery;
@@ -363,10 +363,10 @@ namespace mumlib {
                 }
                     break;
                 case MessageType::USERSTATS:
-                    logger.warn("UserStats Message: support not implemented yet");
+                    printf("WARN: UserStats Message: support not implemented yet");
                     break;
                 case MessageType::REQUESTBLOB: // 23
-                    logger.warn("RequestBlob Message: I don't think this is sent by the server.");
+                    printf("WARN: RequestBlob Message: I don't think this is sent by the server.");
                     break;
                 case MessageType::SERVERCONFIG: {
                     MumbleProto::ServerConfig serverConfig;
@@ -383,7 +383,7 @@ namespace mumlib {
                 }
                     break;
                 case MessageType::SUGGESTCONFIG: // 25
-                    logger.warn("SuggestConfig Message: support not implemented yet");
+                    printf("WARN: SuggestConfig Message: support not implemented yet");
                     break;
                 default:
                     throw MumlibException("unknown message type: " + to_string(static_cast<int>(messageType)));

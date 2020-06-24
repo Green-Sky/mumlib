@@ -71,7 +71,8 @@ namespace mumlib {
         void resetJitterBuffer();
 
     private:
-        log4cpp::Category &logger;
+        //log4cpp::Category &logger;
+		//std::ostream& logger;
 
         std::map<int, OpusDecoder *> opusDecoders;
         OpusEncoder *opusEncoder;

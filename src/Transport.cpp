@@ -10,6 +10,7 @@
 #include <boost/format.hpp>
 
 #include <thread>
+#include <iostream>
 
 using namespace std;
 
@@ -39,7 +40,8 @@ mumlib::Transport::Transport(
         bool noUdp,
         std::string cert_file,
         std::string privkey_file) :
-        logger(log4cpp::Category::getInstance("mumlib.Transport")),
+        //logger(log4cpp::Category::getInstance("mumlib.Transport")),
+		//logger{std::cerr},
         ioService(ioService),
         processMessageFunction(std::move(processMessageFunc)),
         processEncodedAudioPacketFunction(std::move(processEncodedAudioPacketFunction)),
@@ -77,17 +79,17 @@ void mumlib::Transport::connect(
     udpActive = false;
     state = ConnectionState::IN_PROGRESS;
 
-    logger.warn("Verify_mode");
+    printf("WARN: Verify_mode");
     sslSocket.set_verify_mode(boost::asio::ssl::verify_peer);
 
-    logger.warn("set_verify_callback");
+    printf("WARN: set_verify_callback");
 
     //todo for now it accepts every certificate, move it to callback
     sslSocket.set_verify_callback([](bool preverified, boost::asio::ssl::verify_context &ctx) {
         return true;
     });
 
-    logger.warn("Trying connection...");
+    printf("WARN: Trying connection...");
 
     try {
         if (not noUdp) {
@@ -100,19 +102,19 @@ void mumlib::Transport::connect(
             udpSocket.send_to(boost::asio::buffer(send_buf), udpReceiverEndpoint);
 
             doReceiveUdp();
-            logger.warn("noUdp try");
+            printf("WARN: noUdp try");
         }
 
-        logger.warn("after noUdp try");
+        printf("WARN: after noUdp try");
 
         ip::tcp::resolver resolverTcp(ioService);
-        logger.warn("resolverTcp");
+        printf("WARN: resolverTcp");
         ip::tcp::resolver::query queryTcp(host, to_string(port));
-        logger.warn("queryTcp");
+        printf("WARN: queryTcp");
 
         async_connect(sslSocket.lowest_layer(), resolverTcp.resolve(queryTcp),
                       bind(&Transport::sslConnectHandler, this, boost::asio::placeholders::error));
-        logger.warn("async_connect try");
+        printf("WARN: async_connect try");
     } catch (runtime_error &exp) {
         throwTransportException(string("failed to establish connection: ") + exp.what());
     }
@@ -132,7 +134,7 @@ void mumlib::Transport::disconnect()
         udpSocket.shutdown(boost::asio::ip::udp::socket::shutdown_both, errorCode);
         udpSocket.close(errorCode);
         if (errorCode) {
-            logger.warn("Not ping: UDP socket close returned error: %s.", errorCode.message().c_str());
+            printf("WARN: Not ping: UDP socket close returned error: %s.", errorCode.message().c_str());
         }
 
         state = ConnectionState::NOT_CONNECTED;
@@ -151,7 +153,7 @@ void mumlib::Transport::sendVersion() {
     version.set_release(CLIENT_RELEASE);
     version.set_os_version(CLIENT_OS_VERSION);
 
-    logger.warn("Sending version information.");
+    printf("WARN: Sending version information.");
 
     sendControlMessagePrivate(MessageType::VERSION, version);
 }
@@ -167,7 +169,7 @@ void mumlib::Transport::sendAuthentication() {
     authenticate.clear_tokens();
     authenticate.set_opus(true);
 
-    logger.warn("Sending authententication.");
+    printf("WARN: Sending authententication.");
 
     sendControlMessagePrivate(MessageType::AUTHENTICATE, authenticate);
 }
@@ -175,7 +177,7 @@ void mumlib::Transport::sendAuthentication() {
 void mumlib::Transport::sendSslPing() {
 
     if (ping_state == PingState::PING) {
-        logger.warn("Continue sending SSL ping.");
+        printf("WARN: Continue sending SSL ping.");
         disconnect();
         return;
     }
@@ -186,7 +188,7 @@ void mumlib::Transport::sendSslPing() {
 
     ping.set_timestamp(std::time(nullptr));
 
-    logger.warn("Sending SSL ping.");
+    printf("WARN: Sending SSL ping.");
 
     sendControlMessagePrivate(MessageType::PING, ping);
 }
@@ -203,7 +205,7 @@ void mumlib::Transport::doReceiveUdp()
             udpReceiverEndpoint,
             [this](const boost::system::error_code &ec, size_t bytesTransferred) {
                 if (!ec and bytesTransferred > 0) {
-                    //logger.warn("Received UDP packet of %d B.", bytesTransferred);
+                    //printf("WARN: Received UDP packet of %d B.", bytesTransferred);
 
                     if (not cryptState.isValid()) {
                         throwTransportException("received UDP packet before: CRYPT SETUP message");
@@ -212,7 +214,7 @@ void mumlib::Transport::doReceiveUdp()
 
                         if (udpActive == false) {
                             udpActive = true;
-                            logger.warn("UDP is up.");
+                            printf("WARN: UDP is up.");
                         }
 
                         uint8_t plainBuffer[1024];
@@ -231,9 +233,9 @@ void mumlib::Transport::doReceiveUdp()
                     doReceiveUdp();
                 } else if (ec == boost::asio::error::operation_aborted) {
                     boost::system::error_code errorCode;
-                    logger.warn("UDP receive function cancelled.");
+                    printf("WARN: UDP receive function cancelled.");
                     if (ping_state == PingState::PING) {
-                        logger.warn("UDP receive function cancelled PONG.");
+                        printf("WARN: UDP receive function cancelled PONG.");
                     }
                 } else {
                     throwTransportException("UDP receive failed: " + ec.message());
@@ -274,7 +276,7 @@ void mumlib::Transport::pingTimerTick(const boost::system::error_code &e) {
         if (not noUdp) {
             using namespace std::chrono;
 
-            logger.warn("pingTimerTick: Sending UDP ping.");
+            printf("WARN: pingTimerTick: Sending UDP ping.");
             sendUdpPing();
 
             if (udpActive) {
@@ -282,18 +284,18 @@ void mumlib::Transport::pingTimerTick(const boost::system::error_code &e) {
                         system_clock::now() - lastReceivedUdpPacketTimestamp).count();
 
                 if (lastUdpReceivedMilliseconds > PING_INTERVAL.total_milliseconds() + 1000) {
-                    logger.warn("Didn't receive UDP ping in %d ms, falling back to TCP.", lastUdpReceivedMilliseconds);
+                    printf("WARN: Didn't receive UDP ping in %d ms, falling back to TCP.", lastUdpReceivedMilliseconds);
                 }
             }
         }
     }
 
     if ((state == ConnectionState::NOT_CONNECTED) && (ping_state == PingState::PING)) {
-        logger.warn("pingTimerTick disconnect!.");
+        printf("WARN: pingTimerTick disconnect!.");
         disconnect();
     }
 
-    logger.warn("TimerTick!.");
+    printf("WARN: TimerTick!.");
     pingTimer.expires_at(pingTimer.expires_at() + PING_INTERVAL);
     pingTimer.async_wait(boost::bind(&Transport::pingTimerTick, this, _1));
 }
@@ -308,7 +310,7 @@ void mumlib::Transport::sendUdpAsync(uint8_t *buff, int length) {
 
     cryptState.encrypt(buff, reinterpret_cast<uint8_t *>(encryptedMsgBuff), static_cast<unsigned int>(length));
 
-    //logger.warn("Sending %d B of data UDP asynchronously.", encryptedMsgLength);
+    //printf("WARN: Sending %d B of data UDP asynchronously.", encryptedMsgLength);
 
     udpSocket.async_send_to(
             boost::asio::buffer(encryptedMsgBuff, static_cast<size_t>(length + 4)),
@@ -316,7 +318,7 @@ void mumlib::Transport::sendUdpAsync(uint8_t *buff, int length) {
             [this, encryptedMsgBuff](const boost::system::error_code &ec, size_t bytesTransferred) {
                 asyncBufferPool.free(encryptedMsgBuff);
                 if (!ec and bytesTransferred > 0) {
-                    //logger.warn("Sent %d B via UDP.", bytesTransferred);
+                    //printf("WARN: Sent %d B via UDP.", bytesTransferred);
                 } else {
                     throwTransportException("UDP send failed: " + ec.message());
                 }
@@ -351,7 +353,7 @@ void mumlib::Transport::doReceiveSsl() {
 
                     int messageType = ntohs(*reinterpret_cast<uint16_t *>(sslIncomingBuffer));
 
-                    //logger.warn("Received %d B of data (%d B payload, type %d).", bytesTransferred,
+                    //printf("WARN: Received %d B of data (%d B payload, type %d).", bytesTransferred,
                     //             bytesTransferred - 6, messageType);
 
                     processMessageInternal(
@@ -361,7 +363,7 @@ void mumlib::Transport::doReceiveSsl() {
 
                     doReceiveSsl();
                 } else {
-                    logger.error("SSL receiver error: %s. Bytes transferred: %d.",
+                    printf("ERROR: SSL receiver error: %s. Bytes transferred: %d.",
                                  ec.message().c_str(), bytesTransferred);
                     //todo temporarily disable exception throwing until issue #6 is solved
                     //throwTransportException("receive failed: " + ec.message());
@@ -373,12 +375,12 @@ void mumlib::Transport::processMessageInternal(MessageType messageType, uint8_t 
     switch (messageType) {
 
         case MessageType::UDPTUNNEL: {
-            //logger.warn("Received %d B of encoded audio data via TCP.", length);
+            //printf("WARN: Received %d B of encoded audio data via TCP.", length);
             processAudioPacket(buffer, length);
         }
             break;
         case MessageType::AUTHENTICATE: {
-            logger.warn("Authenticate message received after authenticated.");
+            printf("WARN: Authenticate message received after authenticated.");
         }
             break;
         case MessageType::PING: {
@@ -427,7 +429,7 @@ void mumlib::Transport::processMessageInternal(MessageType messageType, uint8_t 
         case MessageType::SERVERSYNC: {
             state = ConnectionState::CONNECTED;
 
-            logger.warn("SERVERSYNC. Calling external ProcessControlMessageFunction.");
+            printf("WARN: SERVERSYNC. Calling external ProcessControlMessageFunction.");
 
             processMessageFunction(messageType, buffer, length);
         }
@@ -452,17 +454,17 @@ void mumlib::Transport::processMessageInternal(MessageType messageType, uint8_t 
                     throwTransportException("crypt setup: data not valid");
                 }
 
-                logger.warn("Set up cryptography for UDP transport. Sending UDP ping.");
+                printf("WARN: Set up cryptography for UDP transport. Sending UDP ping.");
 
                 sendUdpPing();
 
             } else {
-                logger.warn("Ignoring crypt setup message, because UDP is disabled.");
+                printf("WARN: Ignoring crypt setup message, because UDP is disabled.");
             }
         }
             break;
         default: {
-            logger.warn("Calling external ProcessControlMessageFunction.");
+            printf("WARN: Calling external ProcessControlMessageFunction.");
             processMessageFunction(messageType, buffer, length);
         }
             break;
@@ -471,7 +473,7 @@ void mumlib::Transport::processMessageInternal(MessageType messageType, uint8_t 
 
 void mumlib::Transport::sendUdpPing()
 {
-    //logger.warn("Sending UDP ping.");
+    //printf("WARN: Sending UDP ping.");
 
     vector<uint8_t> message;
     message.push_back(0x20);
@@ -485,11 +487,11 @@ void mumlib::Transport::sendUdpPing()
 void mumlib::Transport::sendSsl(uint8_t *buff, int length) {
 
     if (length > MAX_TCP_LENGTH) {
-        logger.warn("Sending %d B of data via SSL. Maximal allowed data length to receive is %d B.", length,
+        printf("WARN: Sending %d B of data via SSL. Maximal allowed data length to receive is %d B.", length,
                     MAX_TCP_LENGTH);
     }
 
-    //logger.warn("Sending %d bytes of data.", length);
+    //printf("WARN: Sending %d bytes of data.", length);
 
     if (!buff) {
         return;
@@ -504,7 +506,7 @@ void mumlib::Transport::sendSsl(uint8_t *buff, int length) {
 
 void mumlib::Transport::sendSslAsync(uint8_t *buff, int length) {
     if (length > MAX_TCP_LENGTH) {
-        logger.warn("Sending %d B of data via SSL. Maximal allowed data length to receive is %d B.", length,
+        printf("WARN: Sending %d B of data via SSL. Maximal allowed data length to receive is %d B.", length,
                     MAX_TCP_LENGTH);
     }
 
@@ -512,14 +514,14 @@ void mumlib::Transport::sendSslAsync(uint8_t *buff, int length) {
 
     memcpy(asyncBuff, buff, static_cast<size_t>(length));
 
-    //logger.warn("Sending %d B of data asynchronously.", length);
+    //printf("WARN: Sending %d B of data asynchronously.", length);
 
     async_write(
             sslSocket,
             boost::asio::buffer(asyncBuff, static_cast<size_t>(length)),
             [this, asyncBuff](const boost::system::error_code &ec, size_t bytesTransferred) {
                 asyncBufferPool.free(asyncBuff);
-                //logger.warn("Sent %d B.", bytesTransferred);
+                //printf("WARN: Sent %d B.", bytesTransferred);
                 if (!ec and bytesTransferred > 0) {
 
                 } else {
@@ -530,7 +532,7 @@ void mumlib::Transport::sendSslAsync(uint8_t *buff, int length) {
 
 void mumlib::Transport::sendControlMessage(MessageType type, google::protobuf::Message &message) {
     if (state != ConnectionState::CONNECTED) {
-        logger.warn("sendControlMessage: Connection not established.");
+        printf("WARN: sendControlMessage: Connection not established.");
         return;
     }
     sendControlMessagePrivate(type, message);
@@ -575,15 +577,15 @@ mumlib::SslContextHelper::SslContextHelper(ssl::context &ctx, std::string cert_f
 
 void mumlib::Transport::sendEncodedAudioPacket(uint8_t *buffer, int length) {
     if (state != ConnectionState::CONNECTED) {
-        logger.warn("sendEncodedAudioPacket: Connection not established.");
+        printf("WARN: sendEncodedAudioPacket: Connection not established.");
         return;
     }
 
     if (udpActive) {
-        //logger.warn("Sending %d B of audio data via UDP.", length);
+        //printf("WARN: Sending %d B of audio data via UDP.", length);
         sendUdpAsync(buffer, length);
     } else {
-        //logger.warn("Sending %d B of audio data via TCP.", length);
+        //printf("WARN: Sending %d B of audio data via TCP.", length);
 
         const uint16_t netUdptunnelType = htons(static_cast<uint16_t>(MessageType::UDPTUNNEL));
 
@@ -609,12 +611,12 @@ void mumlib::Transport::processAudioPacket(uint8_t *buff, int length) {
         case AudioPacketType::CELT_Beta:
         case AudioPacketType::OPUS:
             processEncodedAudioPacketFunction(type, buff, length);
-            //logger.warn("audio typehex: 0x%2x typedec: %d", buff[0], type);
+            //printf("WARN: audio typehex: 0x%2x typedec: %d", buff[0], type);
             break;
         case AudioPacketType::Ping:
             break;
         default:
-            logger.error("Not recognized audio type: %xd.", buff[0]);
+            printf("ERROR: Not recognized audio type: %xd.", buff[0]);
     }
 }
 
