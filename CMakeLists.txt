@@ -2,28 +2,14 @@ cmake_minimum_required(VERSION 3.1.0)
 project(mumlib)
 
 if (NOT APPLE)
-  add_definitions(-DOPT_TLS_GNUTLS -D_POSIX_C_SOURCE=200112L)
+	add_definitions(-DOPT_TLS_GNUTLS -D_POSIX_C_SOURCE=200112L)
 else()
-  LINK_DIRECTORIES(/opt/local/lib) # Include the default MacPorts library directory
+	LINK_DIRECTORIES(/opt/local/lib) # Include the default MacPorts library directory
 endif()
 
-#INCLUDE(FindPkgConfig)
-#find_package(PkgConfig REQUIRED)
 find_package(Boost COMPONENTS system REQUIRED)
 find_package(OpenSSL REQUIRED)
 find_package(Protobuf REQUIRED)
-
-#pkg_check_modules(LOG4CPP "log4cpp")
-#pkg_check_modules(OPUS "opus")
-
-
-#INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIR})
-include_directories(${OPENSSL_INCLUDE_DIR})
-include_directories(${PROTOBUF_INCLUDE_DIRS})
-
-include_directories(${CMAKE_CURRENT_BINARY_DIR})
-#include_directories(${LOG4CPP_INCLUDE_DIRS})
-include_directories(include)
 
 set(MUMLIB_PUBLIC_HEADERS include/mumlib.hpp include/mumlib/VarInt.hpp)
 
@@ -45,23 +31,30 @@ set(MUMLIB_SRC
 )
 
 set(SPEEX_LIBRARIES
-	speex
+	#speex
 	speexdsp
 )
 
 PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS Mumble.proto)
 
 add_library(mumlib ${MUMLIB_SRC} ${MUMLIB_PUBLIC_HEADERS} ${MUMLIB_PRIVATE_HEADERS} ${PROTO_SRCS} ${PROTO_HDRS})
-target_link_libraries(mumlib 
+
+target_compile_features(mumlib PUBLIC cxx_std_11)
+
+target_include_directories(mumlib PUBLIC ${Boost_INCLUDE_DIR})
+target_include_directories(mumlib PUBLIC ${OPENSSL_INCLUDE_DIR})
+target_include_directories(mumlib PUBLIC ${PROTOBUF_INCLUDE_DIRS})
+
+target_include_directories(mumlib PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
+target_include_directories(mumlib PRIVATE "include")
+
+target_link_libraries(mumlib
 	${SPEEX_LIBRARIES}
 	${PROTOBUF_LIBRARIES}
 	${Boost_LIBRARIES}
 	${OPENSSL_LIBRARIES}
-	#${LOG4CPP_LIBRARIES}
-	#${OPUS_LIBRARIES}
 	opus
 )
-target_compile_features(mumlib PUBLIC cxx_std_11)
 
 set_target_properties(mumlib PROPERTIES PUBLIC_HEADER "${MUMLIB_PUBLIC_HEADERS}")
 
