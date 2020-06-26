@@ -2,7 +2,7 @@
 
 #include "Transport.hpp"
 
-#include <opus/opus.h>
+#include <opus.h>
 
 #include <speex/speex_jitter.h>
 
