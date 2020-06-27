@@ -2,6 +2,10 @@
 
 #include <boost/format.hpp>
 
+#ifndef M_PI
+    #define M_PI 3.14159265358979323846
+#endif
+
 static boost::posix_time::seconds RESET_SEQUENCE_NUMBER_INTERVAL(2);
 
 namespace {
