@@ -195,7 +195,19 @@ bool mumlib::CryptState::decrypt(const unsigned char *source, unsigned char *dst
 #define SHIFTBITS 63
 typedef uint64_t subblock;
 
-#define SWAP64(x) (__builtin_bswap64(x))
+#ifdef __GNUC__
+	#define SWAP64(x) (__builtin_bswap64(x))
+#else // #ifdef __GNUC__
+	inline uint64_t __tmp_bswap(uint64_t value) {
+        value = ( value & 0x00000000FFFFFFFF ) << 32 | ( value & 0xFFFFFFFF00000000 ) >> 32;
+        value = ( value & 0x0000FFFF0000FFFF ) << 16 | ( value & 0xFFFF0000FFFF0000 ) >> 16;
+        value = ( value & 0x00FF00FF00FF00FF ) << 8  | ( value & 0xFF00FF00FF00FF00 ) >> 8;
+        return value;
+	}
+
+	#define SWAP64(x) (__tmp_bswap(x))
+#endif // #ifdef __GNUC__
+
 #define SWAPPED(x) SWAP64(x)
 
 typedef subblock keyblock[BLOCKSIZE];
