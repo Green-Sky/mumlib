@@ -67,7 +67,7 @@ namespace mumlib {
         }
 
         virtual ~_Mumlib_Private() {
-            if (not externalIoService) {
+            if (!externalIoService) {
                 delete &ioService;
             }
         }
@@ -191,7 +191,7 @@ namespace mumlib {
                     mumbleChannel.name = channelState.name();
                     mumbleChannel.description = channelState.description();
 
-                    if(not isListChannelContains(channel_id)) {
+                    if(!isListChannelContains(channel_id)) {
                         listMumbleChannel.push_back(mumbleChannel);
                     }
 
@@ -253,7 +253,7 @@ namespace mumlib {
                     mumbleUser.name = userState.name();
                     mumbleUser.sessionId = session;
 
-                    if(not isListUserContains(session)) {
+                    if(!isListUserContains(session)) {
                         listMumbleUser.push_back(mumbleUser);
                     }
 
@@ -467,7 +467,7 @@ namespace mumlib {
     }
 
     void Mumlib::disconnect() {
-        if (not impl->externalIoService) {
+        if (!impl->externalIoService) {
             impl->ioService.stop();
         }
         if (impl->transport.getConnectionState() != ConnectionState::NOT_CONNECTED) {

@@ -127,7 +127,7 @@ void mumlib::Audio::addFrameToBuffer(uint8_t *inputBuffer, int inputLength, int 
     int samples = frame * opus_packet_get_samples_per_frame(packet, iSampleRate);
     int channel = opus_packet_get_nb_channels(packet);
 
-    if(not sequence) {
+    if(!sequence) {
         resetJitterBuffer();
     }
 

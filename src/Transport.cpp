@@ -92,7 +92,7 @@ void mumlib::Transport::connect(
     printf("WARN: Trying connection...\n");
 
     try {
-        if (not noUdp) {
+        if (!noUdp) {
             ip::udp::resolver resolverUdp(ioService);
             ip::udp::resolver::query queryUdp(ip::udp::v4(), host, to_string(port));
             udpReceiverEndpoint = *resolverUdp.resolve(queryUdp);
@@ -207,7 +207,7 @@ void mumlib::Transport::doReceiveUdp()
                 if (!ec and bytesTransferred > 0) {
                     //printf("WARN: Received UDP packet of %d B.\n", bytesTransferred);
 
-                    if (not cryptState.isValid()) {
+                    if (!cryptState.isValid()) {
                         throwTransportException("received UDP packet before: CRYPT SETUP message");
                     } else {
                         lastReceivedUdpPacketTimestamp = std::chrono::system_clock::now();
@@ -223,7 +223,7 @@ void mumlib::Transport::doReceiveUdp()
                         bool success = cryptState.decrypt(
                                 udpIncomingBuffer, plainBuffer, static_cast<unsigned int>(bytesTransferred));
 
-                        if (not success) {
+                        if (!success) {
                             throwTransportException("UDP packet: decryption failed");
                         }
 
@@ -273,7 +273,7 @@ void mumlib::Transport::pingTimerTick(const boost::system::error_code &e) {
 
         sendSslPing();
 
-        if (not noUdp) {
+        if (!noUdp) {
             using namespace std::chrono;
 
             //printf("WARN: pingTimerTick: Sending UDP ping.\n");
@@ -435,7 +435,7 @@ void mumlib::Transport::processMessageInternal(MessageType messageType, uint8_t 
         }
             break;
         case MessageType::CRYPTSETUP: {
-            if (not noUdp) {
+            if (!noUdp) {
                 MumbleProto::CryptSetup cryptsetup;
                 cryptsetup.ParseFromArray(buffer, length);
 
@@ -450,7 +450,7 @@ void mumlib::Transport::processMessageInternal(MessageType messageType, uint8_t 
                         reinterpret_cast<const unsigned char *>(cryptsetup.client_nonce().c_str()),
                         reinterpret_cast<const unsigned char *>(cryptsetup.server_nonce().c_str()));
 
-                if (not cryptState.isValid()) {
+                if (!cryptState.isValid()) {
                     throwTransportException("crypt setup: data not valid");
                 }
 
