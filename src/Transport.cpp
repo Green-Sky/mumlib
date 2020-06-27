@@ -188,7 +188,7 @@ void mumlib::Transport::sendSslPing() {
 
     ping.set_timestamp(std::time(nullptr));
 
-    printf("WARN: Sending SSL ping.\n");
+    //printf("WARN: Sending SSL ping.\n");
 
     sendControlMessagePrivate(MessageType::PING, ping);
 }
@@ -276,7 +276,7 @@ void mumlib::Transport::pingTimerTick(const boost::system::error_code &e) {
         if (not noUdp) {
             using namespace std::chrono;
 
-            printf("WARN: pingTimerTick: Sending UDP ping.\n");
+            //printf("WARN: pingTimerTick: Sending UDP ping.\n");
             sendUdpPing();
 
             if (udpActive) {
@@ -295,7 +295,7 @@ void mumlib::Transport::pingTimerTick(const boost::system::error_code &e) {
         disconnect();
     }
 
-    printf("WARN: TimerTick!.\n");
+    //printf("WARN: TimerTick!.\n");
     pingTimer.expires_at(pingTimer.expires_at() + PING_INTERVAL);
     pingTimer.async_wait(boost::bind(&Transport::pingTimerTick, this, _1));
 }
