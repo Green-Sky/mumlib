@@ -204,7 +204,7 @@ void mumlib::Transport::doReceiveUdp()
             buffer(udpIncomingBuffer, MAX_UDP_LENGTH),
             udpReceiverEndpoint,
             [this](const boost::system::error_code &ec, size_t bytesTransferred) {
-                if (!ec and bytesTransferred > 0) {
+                if (!ec && bytesTransferred > 0) {
                     //printf("WARN: Received UDP packet of %d B.\n", bytesTransferred);
 
                     if (!cryptState.isValid()) {
@@ -317,7 +317,7 @@ void mumlib::Transport::sendUdpAsync(uint8_t *buff, int length) {
             udpReceiverEndpoint,
             [this, encryptedMsgBuff](const boost::system::error_code &ec, size_t bytesTransferred) {
                 asyncBufferPool.free(encryptedMsgBuff);
-                if (!ec and bytesTransferred > 0) {
+                if (!ec && bytesTransferred > 0) {
                     //printf("WARN: Sent %d B via UDP.\n", bytesTransferred);
                 } else {
                     throwTransportException("UDP send failed: " + ec.message());
@@ -349,7 +349,7 @@ void mumlib::Transport::doReceiveSsl() {
                 return remaining;
             },
             [this](const boost::system::error_code &ec, size_t bytesTransferred) {
-                if (!ec and bytesTransferred > 0) {
+                if (!ec && bytesTransferred > 0) {
 
                     int messageType = ntohs(*reinterpret_cast<uint16_t *>(sslIncomingBuffer));
 
@@ -440,8 +440,8 @@ void mumlib::Transport::processMessageInternal(MessageType messageType, uint8_t 
                 cryptsetup.ParseFromArray(buffer, length);
 
                 if (cryptsetup.client_nonce().length() != AES_BLOCK_SIZE
-                    or cryptsetup.server_nonce().length() != AES_BLOCK_SIZE
-                    or cryptsetup.key().length() != AES_BLOCK_SIZE) {
+                    || cryptsetup.server_nonce().length() != AES_BLOCK_SIZE
+                    || cryptsetup.key().length() != AES_BLOCK_SIZE) {
                     throwTransportException("one of cryptographic: parameters has invalid length");
                 }
 
@@ -522,7 +522,7 @@ void mumlib::Transport::sendSslAsync(uint8_t *buff, int length) {
             [this, asyncBuff](const boost::system::error_code &ec, size_t bytesTransferred) {
                 asyncBufferPool.free(asyncBuff);
                 //printf("WARN: Sent %d B.\n", bytesTransferred);
-                if (!ec and bytesTransferred > 0) {
+                if (!ec && bytesTransferred > 0) {
 
                 } else {
                     throwTransportException("async SSL send failed: " + ec.message());
