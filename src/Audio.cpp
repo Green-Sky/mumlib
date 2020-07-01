@@ -160,9 +160,9 @@ std::pair<int, bool> mumlib::Audio::decodeOpusPayload(int sessionId, int16_t *pc
     jbPacket.len = 4096;
 
     spx_int32_t startofs = 0;
-    int opusDataLength;
-    int outputSize;
-    spx_uint32_t lastPacket;
+    int opusDataLength = 0;
+    int outputSize = 0;
+    spx_uint32_t lastPacket = 0;
 
     if(jitter_buffer_get(jbBuffer, &jbPacket, iFrameSize, &startofs) == JITTER_BUFFER_OK) {
         opusDataLength = jbPacket.len;
