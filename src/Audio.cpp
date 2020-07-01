@@ -185,6 +185,9 @@ std::pair<int, bool> mumlib::Audio::decodeOpusPayload(int sessionId, int16_t *pc
                                     NULL, 0, pcmBuffer, pcmBufferSize, 0);        
     }
 
+	// opus_decode returns number of samples per channel
+	outputSize *= iChannels;
+
     if(outputSize < 0) {
         outputSize = iFrameSize;
         memset(pcmBuffer, 0, iFrameSize * sizeof(float));
