@@ -57,14 +57,14 @@ mumlib::Audio::Audio(int sampleRate, int bitrate, int channels)
         throw AudioException((boost::format("failed to initialize variable bitrate constraint: %s") 
                             % opus_strerror(ret)).str());
     }
-    ret = opus_encoder_ctl(opusEncoder, OPUS_SET_BANDWIDTH(OPUS_BANDWIDTH_NARROWBAND));
+    ret = opus_encoder_ctl(opusEncoder, OPUS_SET_BANDWIDTH(OPUS_BANDWIDTH_FULLBAND));
     if (ret != OPUS_OK) {
-        throw AudioException((boost::format("failed to initialize bandwidth narrow: %s") 
+        throw AudioException((boost::format("failed to initialize bandwidth full: %s") 
                             % opus_strerror(ret)).str());
     }
-    ret = opus_encoder_ctl(opusEncoder, OPUS_SET_MAX_BANDWIDTH(OPUS_BANDWIDTH_NARROWBAND));
+    ret = opus_encoder_ctl(opusEncoder, OPUS_SET_MAX_BANDWIDTH(OPUS_BANDWIDTH_FULLBAND));
     if (ret != OPUS_OK) {
-        throw AudioException((boost::format("failed to initialize maximum bandwidth narrow: %s") 
+        throw AudioException((boost::format("failed to initialize maximum bandwidth full: %s") 
                             % opus_strerror(ret)).str());
     }
 
