@@ -349,7 +349,11 @@ void mumlib::Transport::doReceiveSsl() {
                 return remaining;
             },
             [this](const boost::system::error_code &ec, size_t bytesTransferred) {
-                if (!ec && bytesTransferred > 0) {
+                if (!ec/* && bytesTransferred > 0*/) {
+					if (bytesTransferred == 0) {
+						printf("ERROR: received %zu bytes.\n", bytesTransferred);
+						return;
+					}
 
                     int messageType = ntohs(*reinterpret_cast<uint16_t *>(sslIncomingBuffer));
 
@@ -363,7 +367,7 @@ void mumlib::Transport::doReceiveSsl() {
 
                     doReceiveSsl();
                 } else {
-                    printf("ERROR: SSL receiver error: %s. Bytes transferred: %d.\n",
+                    printf("ERROR: SSL receiver error: %s. Bytes transferred: %zu.\n",
                                  ec.message().c_str(), bytesTransferred);
                     //todo temporarily disable exception throwing until issue #6 is solved
                     //throwTransportException("receive failed: " + ec.message());
@@ -500,7 +504,8 @@ void mumlib::Transport::sendSsl(uint8_t *buff, int length) {
     try {
         write(sslSocket, boost::asio::buffer(buff, static_cast<size_t>(length)));
     } catch (boost::system::system_error &err) {
-        throwTransportException(std::string("SSL send failed: ") + err.what());
+		//throwTransportException(std::string("SSL send failed: ") + err.what());
+		printf("ERROR: SSL send failed: %s\n", err.what());
     }
 }
 

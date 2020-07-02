@@ -129,13 +129,13 @@ void mumlib::Audio::addFrameToBuffer(uint8_t *inputBuffer, int inputLength, int 
     auto *packet = reinterpret_cast<const unsigned char *>(&inputBuffer[dataPointer]);
     int frame = opus_packet_get_nb_frames(packet, opusDataLength);
     int samples = frame * opus_packet_get_samples_per_frame(packet, iSampleRate);
-    int channel = opus_packet_get_nb_channels(packet);
+    //int channel = opus_packet_get_nb_channels(packet);
 
     if(!sequence) {
         resetJitterBuffer();
     }
 
-    printf("INFO: Opus packet, frame: %d, samples: %d, channel: %d\n", frame, samples, channel);
+    //printf("INFO: Opus packet, frame: %d, samples: %d, channel: %d\n", frame, samples, channel);
 
     JitterBufferPacket jbPacket;
     jbPacket.data = reinterpret_cast<char *>(&inputBuffer[dataPointer]);
@@ -202,8 +202,8 @@ std::pair<int, bool> mumlib::Audio::decodeOpusPayload(int sessionId, int16_t *pc
         jitter_buffer_tick(jbBuffer);
     }
     
-    printf("DEBUG: %d B of Opus data decoded to %d PCM samples, last packet: %d.\n",
-                 opusDataLength, outputSize, lastPacket);
+    //printf("DEBUG: %d B of Opus data decoded to %d PCM samples, last packet: %d.\n",
+                 //opusDataLength, outputSize, lastPacket);
 
     return std::make_pair(outputSize, lastPacket);
 }

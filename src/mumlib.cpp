@@ -73,7 +73,7 @@ namespace mumlib {
         }
 
         bool processAudioPacket(AudioPacketType type, uint8_t *buffer, int length) {
-            printf("INFO: Got %d B of encoded audio data.\n", length);
+            //printf("INFO: Got %d B of encoded audio data.\n", length);
             try {
                 auto incomingAudioPacket = audio.decodeIncomingAudioPacket(buffer, length);
 
