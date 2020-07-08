@@ -82,4 +82,5 @@ namespace mumlib {
         void encrypt(const unsigned char *source, unsigned char *dst, unsigned int plain_length);
     };
 
-};
+} // mumlib
+

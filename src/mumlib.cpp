@@ -26,10 +26,10 @@ namespace mumlib {
     struct _Mumlib_Private : boost::noncopyable {
         //log4cpp::Category &logger = log4cpp::Category::getInstance("mumlib.Mumlib");
 
-        bool externalIoService;
+        Callback &callback;
         io_service &ioService;
 
-        Callback &callback;
+        bool externalIoService;
 
         Transport transport;
 
@@ -101,7 +101,7 @@ namespace mumlib {
                                 status.first);
 
                 } else {
-                    printf("WARN: Incoming audio packet doesn't contain Opus data, calling unsupportedAudio callback. Type: %d\n", type);
+                    printf("WARN: Incoming audio packet doesn't contain Opus data, calling unsupportedAudio callback. Type: %d\n", (int)type);
                     callback.unsupportedAudio(incomingAudioPacket.target,
                                               incomingAudioPacket.sessionId,
                                               incomingAudioPacket.sequenceNumber,
@@ -119,7 +119,7 @@ namespace mumlib {
     private:
 
         bool processIncomingTcpMessage(MessageType messageType, uint8_t *buffer, int length) {
-            printf("DEBUG: Process incoming message: type %d, length: %d.\n", messageType, length);
+            printf("DEBUG: Process incoming message: type %d, length: %d.\n", (int)messageType, length);
 
             switch (messageType) {
                 case MessageType::VERSION: {
@@ -392,14 +392,14 @@ namespace mumlib {
         }
 
         bool isListUserContains(int sessionId) {
-            for(int i = 0; i < listMumbleUser.size(); i++)
+            for(size_t i = 0; i < listMumbleUser.size(); i++)
                 if(listMumbleUser[i].sessionId == sessionId)
                     return true;
             return false;
         }
 
         void listUserRemovedBy(int sessionId) {
-            for(int i = 0; i < listMumbleUser.size(); i++) {
+            for(size_t i = 0; i < listMumbleUser.size(); i++) {
                 if(listMumbleUser[i].sessionId == sessionId) {
                     listMumbleUser.erase(listMumbleUser.begin() + i);
                     return;
@@ -408,14 +408,14 @@ namespace mumlib {
         }
 
         bool isListChannelContains(int channelId) {
-            for(int i = 0; i < listMumbleChannel.size(); i++)
+            for(size_t i = 0; i < listMumbleChannel.size(); i++)
                 if(listMumbleChannel[i].channelId == channelId)
                     return true;
             return false;
         }
 
         void listChannelRemovedBy(int channelId) {
-            for(int i = 0; i < listMumbleChannel.size(); i++) {
+            for(size_t i = 0; i < listMumbleChannel.size(); i++) {
                 if(listMumbleChannel[i].channelId == channelId) {
                     listMumbleChannel.erase(listMumbleChannel.begin() + i);
                     return;
@@ -616,7 +616,7 @@ namespace mumlib {
 
     int Mumlib::getChannelIdBy(string name) {
         vector<mumlib::MumbleChannel> listMumbleChannel = impl->listMumbleChannel;
-        for(int i = 0; i < listMumbleChannel.size(); i++)
+        for(size_t i = 0; i < listMumbleChannel.size(); i++)
             if(listMumbleChannel[i].name == name)
                 return listMumbleChannel[i].channelId;
         return -1;
@@ -624,7 +624,7 @@ namespace mumlib {
 
     int Mumlib::getUserIdBy(string name) {
         vector<mumlib::MumbleUser> listMumbleUser = impl->listMumbleUser;
-        for(int i = 0; i < listMumbleUser.size(); i++)
+        for(size_t i = 0; i < listMumbleUser.size(); i++)
             if(listMumbleUser[i].name == name)
                 return listMumbleUser[i].sessionId;
         return -1;
@@ -632,7 +632,7 @@ namespace mumlib {
 
     bool Mumlib::isSessionIdValid(int sessionId) {
         vector<mumlib::MumbleUser> listMumbleUser = impl->listMumbleUser;
-        for(int i = 0; i < listMumbleUser.size(); i++)
+        for(size_t i = 0; i < listMumbleUser.size(); i++)
             if(listMumbleUser[i].sessionId == sessionId)
                 return true;
         return false;
@@ -640,9 +640,10 @@ namespace mumlib {
 
     bool Mumlib::isChannelIdValid(int channelId) {
         vector<mumlib::MumbleChannel> listMumbleChannel = impl->listMumbleChannel;
-        for(int i = 0; i < listMumbleChannel.size(); i++)
+        for(size_t i = 0; i < listMumbleChannel.size(); i++)
             if(listMumbleChannel[i].channelId == channelId)
                 return true;
         return false;
     }
-}
+} // mumlib
+
